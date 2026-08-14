@@ -1,0 +1,13 @@
+# Test profile. Datasource is provided by TestcontainersConfiguration via
+# @ServiceConnection — no URL/username/password here, on purpose.
+
+spring:
+  jpa:
+    properties:
+      hibernate.generate_statistics: true
+
+logging:
+  level:
+    com.malatesha.ems: DEBUG
+    org.testcontainers: INFO
+    com.github.dockerjava: WARN

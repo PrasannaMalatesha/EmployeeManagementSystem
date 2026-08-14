@@ -1,0 +1,64 @@
+# Local dev stack. `docker compose up -d` and the app in `./mvnw spring-boot:run`
+# will find Postgres on localhost:5432 and MinIO on localhost:9000.
+#
+# CI does not use this file — Testcontainers manages its own Postgres per suite.
+
+name: ems
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: ems-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-ems}
+      POSTGRES_USER: ${POSTGRES_USER:-ems}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ems}
+    # Host port 5433 so this coexists with another Postgres container already
+    # running on the default 5432 (e.g. the Personal Finance App project).
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  minio:
+    image: minio/minio:latest
+    container_name: ems-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+    ports:
+      - "9000:9000"   # S3 API
+      - "9001:9001"   # web console
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # One-shot: create the documents bucket once MinIO is healthy, then exit.
+  minio-init:
+    image: minio/mc:latest
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      mc alias set local http://minio:9000 $${MINIO_ROOT_USER} $${MINIO_ROOT_PASSWORD} &&
+      mc mb --ignore-existing local/ems-documents &&
+      echo 'bucket ready';
+      "
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+
+volumes:
+  postgres_data:
+  minio_data:

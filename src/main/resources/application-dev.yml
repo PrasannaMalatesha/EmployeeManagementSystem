@@ -1,0 +1,30 @@
+# Local dev profile. Assumes the compose stack in compose.yml is running.
+# Values here are safe to check in — they're intentionally weak, local-only
+# credentials that match compose.yml. Anything sensitive belongs in .env
+# (see .env.example) and is read via SPRING_DATASOURCE_* env vars in real
+# environments.
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5433/ems   # compose.yml maps 5433 → container 5432
+    username: ems
+    password: ems
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+  jpa:
+    properties:
+      hibernate.generate_statistics: true    # for N+1 detection in dev
+      hibernate.format_sql: true
+    show-sql: false                          # noisy; enable when investigating
+
+logging:
+  level:
+    com.malatesha.ems: DEBUG
+    org.hibernate.SQL: INFO
+    org.springframework.security: INFO
+
+management:
+  endpoint:
+    health:
+      show-details: always                   # dev only; prod stays 'never'

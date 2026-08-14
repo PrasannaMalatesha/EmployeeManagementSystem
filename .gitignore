@@ -1,0 +1,53 @@
+# Maven
+target/
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# Environment / secrets
+.env
+.env.local
+.env.*.local
+
+# IDE — IntelliJ / Eclipse / STS / VS Code / NetBeans
+.idea/
+*.iws
+*.iml
+*.ipr
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings/
+.springBeans
+.sts4-cache
+.vscode/
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+# Build outputs
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+out/
+bin/
+
+# Logs
+*.log
+logs/
+
+# Frontend (M4+)
+node_modules/
+dist/
+.next/
+.turbo/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+docker-volumes/
